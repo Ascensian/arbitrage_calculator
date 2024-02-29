@@ -1,4 +1,4 @@
-export interface TriangularPair {
+export interface IPair {
     a_base: string;
     b_base: string;
     c_base: string;
