@@ -1,10 +1,12 @@
 import axios, { AxiosResponse } from 'axios';
+import { ITicker } from '../../definitions/tickers/ticker.interface';
 
 export class PoloniexHttpService {
     // Poloniex Symbols / All tradable coins
     static async getCoins(): Promise<string[] | undefined> {
         try {
-            const response: AxiosResponse = await axios.get(`${process.env.POLONIEX_MARKETS_URL}`);
+            const url = process.env.POLONIEX_MARKETS_URL
+            const response: AxiosResponse = await axios.get(`${url}`);
             if (response.status == 200) {
                 const coinList: Array<string> = []
                 response.data.forEach((element: { symbol: string; state: string }) => {
@@ -21,14 +23,13 @@ export class PoloniexHttpService {
         }
     }
 
-    // Poloniex OrderBook
-    static async getOrderBook(symbol: string): Promise<string[] | undefined> {
+    // Poloniex Tickers
+    static async getTickers(): Promise<ITicker[] | undefined> {
         try {
-            const url = process.env.POLONIEX_MARKETS_URL + `/${symbol}/orderBook`
-            const response: AxiosResponse = await axios.get(url);
+            const url = process.env.POLONIEX_TICKERS_URL
+            const response: AxiosResponse = await axios.get(`${url}`);
             if (response.status == 200) {
-                return response.data['asks']
-
+                return response.data
             } else {
                 console.log(response.status);
             }

@@ -1,5 +1,5 @@
 import express from 'express';
-import { PoloniexController } from './poloniex/poloniex.controller';
+import { PoloniexController } from './express/poloniex/poloniex.controller';
 
 export function launchAPI() {
     const app = express()

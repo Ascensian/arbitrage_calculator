@@ -1,1 +1,1 @@
-export * from '../platforms/poloniex/poloniex.controller'
+export * from './express/poloniex/poloniex.controller'
