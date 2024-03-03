@@ -36,8 +36,8 @@ export class PoloniexController {
     buildRoutes(): Router {
         const router = Router();
         router.get('/pairs', this.getPairs.bind(this))
-        router.get('/triangularpairs', this.getTriangularPairs.bind(this))
-        // router.get('/prices', this.getPrices.bind(this))
+        // router.get('/triangularpairs', this.getTriangularPairs.bind(this))
+        router.get('/prices', this.getPrices.bind(this))
         return router;
     }
 }

@@ -1,7 +1,7 @@
 import express from 'express';
 import { PoloniexController } from './express/poloniex/poloniex.controller';
 
-export function launchAPI() {
+export function startAPI() {
     const app = express()
     const port = process.env.PORT
 
