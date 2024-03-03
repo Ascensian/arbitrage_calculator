@@ -1,20 +1,99 @@
 import axios from "axios";
 
-export async function getCoinTickers(url: string): Promise<any> {
+export interface TPair {
+  pair_a: string;
+  pair_b: string;
+  pair_c: string;
+  a_base: string;
+  a_quote: string;
+  b_base: string;
+  b_quote: string;
+  c_base: string;
+  c_quote: string;
+  triangular_pair: string;
+}
+
+export interface PricesJson {
+  [key: string]: {
+    lowestAsk: string;
+    highestBid: string;
+  };
+}
+
+interface PricesDict {
+  pair_a_ask: number;
+  pair_a_bid: number;
+  pair_b_ask: number;
+  pair_b_bid: number;
+  pair_c_ask: number;
+  pair_c_bid: number;
+}
+
+interface SurfaceDict {
+  swap_1: string;
+  swap_2: string;
+  swap_3: string;
+  contract_1: string;
+  contract_2: string;
+  contract_3: string;
+  direction_trade_1: string;
+  direction_trade_2: string;
+  direction_trade_3: string;
+  starting_amount: number;
+  acquired_coin_t1: number;
+  acquired_coin_t2: number;
+  acquired_coin_t3: number;
+  swap_1_rate: number;
+  swap_2_rate: number;
+  swap_3_rate: number;
+  profit_loss: number;
+  profit_loss_perc: number;
+  direction: string;
+  trade_description_1: string;
+  trade_description_2: string;
+  trade_description_3: string;
+}
+
+interface DepthInfo {
+  profit_loss: number;
+  acquired_coin_t3: number;
+  starting_amount: number;
+  real_rate_perc: number;
+  contract_1: string;
+  contract_2: string;
+  contract_3: string;
+  contract_1_direction: string;
+  contract_2_direction: string;
+  contract_3_direction: string;
+  trade_description_1: string;
+  trade_description_2: string;
+  trade_description_3: string;
+}
+
+interface DepthPrices {
+  asks: string[];
+  bids: string[];
+}
+
+export async function get(url: string): Promise<any> {
   try {
     const response = await axios.get(url);
 
     if (response.status === 200) {
       return response.data;
     } else {
-      throw new Error("Failed to get coin tickers");
+      throw new Error("Failed to get");
     }
   } catch (error: any) {
-    console.error("Error fetching structured pairs:", error.message);
+    console.error("Error fetching :", error.message);
   }
 }
 
-export function getPriceForTPair(tPair: any, pricesJson: any): any {
+//export function getPriceForTPair(tPair: TPair, pricesJson: PricesJson):
+export function getPriceForTPair(
+  tPair: TPair,
+  pricesJson: PricesJson
+): PricesDict {
   // Extract Pair Info
   const pair_a: string = tPair["pair_a"];
   const pair_b: string = tPair["pair_b"];
@@ -39,7 +118,11 @@ export function getPriceForTPair(tPair: any, pricesJson: any): any {
   };
 }
 
-export function calcTriangularArbSurfaceRate(tPair: any, pricesDict: any): any {
+//export function calcTriangularArbSurfaceRate(tPair: TPair,pricesDict: PricesJson)
+export function calcTriangularArbSurfaceRate(
+  tPair: TPair,
+  pricesDict: PricesDict
+): SurfaceDict {
   // Set Variables
   const startingAmount: number = 1;
   const minSurfaceRate: number = 0;
@@ -381,12 +464,10 @@ export function calcTriangularArbSurfaceRate(tPair: any, pricesDict: any): any {
   return surfaceDict;
 }
 
-interface Prices {
-  asks: string[];
-  bids: string[];
-}
-
-function reformattedOrderbook(prices: Prices, cDirection: string): number[][] {
+function reformattedOrderbook(
+  prices: DepthPrices,
+  cDirection: string
+): number[][] {
   const priceListMain: number[][] = [];
   if (cDirection === "base_to_quote") {
     for (let i = 0; i < prices.asks.length; i += 2) {
@@ -444,8 +525,10 @@ function calculateAcquiredCoin(
   return acquiredCoin;
 }
 
-export async function getDepthFromOrderbook(surfaceArb: any): Promise<any> {
-  const swap1: string = surfaceArb.swap_1;
+export async function getDepthFromOrderbook(
+  surfaceDict: SurfaceDict
+): Promise<DepthInfo | { "realRatePerc < -1": string }> {
+  const swap1: string = surfaceDict.swap_1;
 
   let startingAmount: number = 100;
   const startingAmountDict: { [key: string]: number } = {
@@ -458,19 +541,19 @@ export async function getDepthFromOrderbook(surfaceArb: any): Promise<any> {
     startingAmount = startingAmountDict[swap1];
   }
 
-  const contract1: string = surfaceArb.contract_1;
-  const contract2: string = surfaceArb.contract_2;
-  const contract3: string = surfaceArb.contract_3;
+  const contract1: string = surfaceDict.contract_1;
+  const contract2: string = surfaceDict.contract_2;
+  const contract3: string = surfaceDict.contract_3;
 
-  const contract1Direction: string = surfaceArb.direction_trade_1;
-  const contract2Direction: string = surfaceArb.direction_trade_2;
-  const contract3Direction: string = surfaceArb.direction_trade_3;
+  const contract1Direction: string = surfaceDict.direction_trade_1;
+  const contract2Direction: string = surfaceDict.direction_trade_2;
+  const contract3Direction: string = surfaceDict.direction_trade_3;
 
-  const tradeDescription1: string = surfaceArb.trade_description_1;
-  const tradeDescription2: string = surfaceArb.trade_description_2;
-  const tradeDescription3: string = surfaceArb.trade_description_3;
+  const tradeDescription1: string = surfaceDict.trade_description_1;
+  const tradeDescription2: string = surfaceDict.trade_description_2;
+  const tradeDescription3: string = surfaceDict.trade_description_3;
 
-  const depth1Prices = await getCoinTickers(
+  const depth1Prices = await get(
     `https://api.poloniex.com/markets/${contract1}/orderBook?limit=20`
   );
 
@@ -479,7 +562,7 @@ export async function getDepthFromOrderbook(surfaceArb: any): Promise<any> {
     contract1Direction
   );
 
-  const depth2Prices = await getCoinTickers(
+  const depth2Prices = await get(
     `https://api.poloniex.com/markets/${contract2}/orderBook?limit=20`
   );
   const depth2ReformattedPrices = reformattedOrderbook(
@@ -487,7 +570,7 @@ export async function getDepthFromOrderbook(surfaceArb: any): Promise<any> {
     contract2Direction
   );
 
-  const depth3Prices = await getCoinTickers(
+  const depth3Prices = await get(
     `https://api.poloniex.com/markets/${contract3}/orderBook?limit=20`
   );
   const depth3ReformattedPrices = reformattedOrderbook(
@@ -512,8 +595,8 @@ export async function getDepthFromOrderbook(surfaceArb: any): Promise<any> {
   const realRatePerc =
     startingAmount !== 0 ? (profitLoss / startingAmount) * 100 : 0;
 
-  //console.log("realRatePerc", realRatePerc);
-  if (realRatePerc > 0) {
+  console.log("realRatePerc", realRatePerc);
+  if (realRatePerc > -1) {
     console.log("if (realRatePerc > -1)");
     return {
       profit_loss: profitLoss,
