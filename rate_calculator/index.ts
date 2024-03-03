@@ -2,8 +2,11 @@ import * as func_arbitrage from "./func_arbitrage";
 import axios from "axios";
 import { TPair } from "./func_arbitrage";
 import { PricesJson } from "./func_arbitrage";
+import { MongoClient } from "mongodb";
 
-// Set Variables
+const mongoURI = "mongodb://localhost:27017";
+const dbName = "mydb";
+const client = new MongoClient(mongoURI);
 
 const structured_pairs_url: string = "https://notreapi.com/s_p";
 const prices_url: string = "https://notreapi.com/prices";
@@ -70,8 +73,32 @@ async function step_1(): Promise<void> {
       const real_rate_dict = await func_arbitrage.getDepthFromOrderbook(
         surface_dict
       );
-      console.log("real rate", real_rate_dict);
+      if (Object.keys(real_rate_dict).length > 1) {
+        // Insérer dans MongoDB avec un timestamp
+        console.log("real rate", real_rate_dict);
+        await insertDocument("real_rate_dict_collection", {
+          real_rate_dict,
+          timestamp: new Date(),
+        });
+      }
     }
+  }
+}
+
+async function insertDocument(
+  collectionName: string,
+  document: any
+): Promise<void> {
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+    await collection.insertOne(document);
+    console.log("Document inserted successfully");
+  } catch (error) {
+    console.error("Error inserting document:", error);
+  } finally {
+    await client.close();
   }
 }
 
