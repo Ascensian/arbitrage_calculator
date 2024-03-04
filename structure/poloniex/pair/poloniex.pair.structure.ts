@@ -23,9 +23,13 @@ export class PoloniexPairStructure {
 
                                 // Determining Triangular Match
                                 if (cBaseCounter == 2 && cQuoteCounter == 2 && cBase != cQuote) {
-                                    const uniqueItem: string = combineAllPairs.sort().join(' ')
-                                    if (!removeDuplicatesList.includes(uniqueItem)) {
-                                        try {
+                                    try {
+                                        const uniqueItem: string = combineAllPairs.sort().join(' ')
+                                        const dbPair = await pairModel.find({ triangular_pair: uniqueItem })
+                                        console.log(uniqueItem);
+                                        console.log(dbPair);
+
+                                        if (dbPair.length == 0) {
                                             await pairModel.create({
                                                 a_base: aBase,
                                                 b_base: bBase,
@@ -38,13 +42,12 @@ export class PoloniexPairStructure {
                                                 pair_c: pairC,
                                                 triangular_pair: uniqueItem
                                             });
-                                        } catch (err) {
-                                            console.log(err);
                                         }
+
+                                    } catch (err) {
+                                        console.log(err);
                                     }
-
                                 }
-
                             }
                         }
 

@@ -22,9 +22,15 @@ export class PoloniexController {
     async getTriangularPairs(req: Request, res: Response): Promise<void> {
         const pairs = await PoloniexHttpService.getCoins()
         if (pairs != undefined) {
-            PoloniexPairStructure.structureTriangularPairs(pairs, this.pairModel)
+            const dbPairs = await this.pairModel.find({}).select('-_id -createdAt -updatedAt')
+            if (dbPairs.length == 0) {
+                await PoloniexPairStructure.structureTriangularPairs(pairs, this.pairModel)
+                console.log("Done");
+            }
+            res.json(dbPairs)
         }
     }
+
 
     async getPrices(req: Request, res: Response): Promise<void> {
         const tickers = await PoloniexHttpService.getTickers()

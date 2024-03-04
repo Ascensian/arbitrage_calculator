@@ -26,6 +26,18 @@ export const PairSchema = new Schema<IPair>({
         type: SchemaTypes.String,
         required: true
     },
+    pair_a: {
+        type: SchemaTypes.String,
+        required: true
+    },
+    pair_b: {
+        type: SchemaTypes.String,
+        required: true
+    },
+    pair_c: {
+        type: SchemaTypes.String,
+        required: true
+    },
     triangular_pair: {
         type: SchemaTypes.String,
         required: false
