@@ -1,8 +1,36 @@
 import * as func_arbitrage from "./func_arbitrage";
 import axios from "axios";
-import { TPair } from "./func_arbitrage";
+import { TPair, DepthInfo } from "./func_arbitrage";
 import { PricesJson } from "./func_arbitrage";
 import { MongoClient } from "mongodb";
+import express, { Request, Response } from "express";
+
+const app = express();
+const port = 3001; // Choisissez le port que vous préférez
+
+// Endpoint pour récupérer l'opportunité réelle
+app.get("/real-opportunity", async (req: Request, res: Response) => {
+  try {
+    const real_rate_dict = await step_1();
+    if (
+      real_rate_dict &&
+      "real_rate_perc" in real_rate_dict &&
+      real_rate_dict.real_rate_perc > 0
+    ) {
+      res.status(200).json(real_rate_dict);
+    } else {
+      res.status(404).json({ message: "Aucune opportunité réelle trouvée" });
+    }
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de l'opportunité réelle :",
+      error
+    );
+    res.status(500).json({
+      error: "Erreur lors de la récupération de l'opportunité réelle",
+    });
+  }
+});
 
 const mongoURI = "mongodb://localhost:27017";
 const dbName = "mydb";
@@ -29,7 +57,9 @@ async function step_0(): Promise<void> {
 // step_0 for stuctured pairs
 //const structured_pairs: StructuredPair[] = await step_0();
 
-async function step_1(): Promise<void> {
+async function step_1(): Promise<
+  DepthInfo | { "realRatePerc < -1": string } | undefined
+> {
   // Get Latest Surface Prices
   //const prices_json: PricesJson[] | null = await axios.get(prices_url);
   async function extractData(): Promise<any> {
@@ -55,9 +85,14 @@ async function step_1(): Promise<void> {
       return null;
     }
   }
-  const prices_json = await extractData();
+  //const prices_json = await extractData();
+  const response = await axios.get<PricesJson>("http://localhost:3000/prices");
+  const prices_json = response.data;
   //console.log("prices_json =", prices_json);
-
+  const response2 = await axios.get<TPair[]>(
+    "http://localhost:3000/triangularpairs"
+  );
+  structured_pairs = response2.data;
   for (const t_pair of structured_pairs) {
     const prices_dict = func_arbitrage.getPriceForTPair(t_pair, prices_json);
     const surface_dict = func_arbitrage.calcTriangularArbSurfaceRate(
@@ -80,6 +115,7 @@ async function step_1(): Promise<void> {
           real_rate_dict,
           timestamp: new Date(),
         });
+        return real_rate_dict;
       }
     }
   }
@@ -107,5 +143,8 @@ if (require.main === module) {
   // step_1(coin_list);
 
   step_1();
-  setInterval(step_1, 170);
+  //setInterval(step_1, 170);
 }
+app.listen(port, () => {
+  console.log(`Serveur démarré sur le port ${port}`);
+});

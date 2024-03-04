@@ -1,0 +1,15 @@
+version: "3"
+services:
+  structuring_pairs:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo_database
+  mongo_database:
+    image: mongo
+    volumes:
+      - mongo_data:/data/db
+volumes:
+  mongo_data:
+    driver: local

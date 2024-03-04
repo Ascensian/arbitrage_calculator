@@ -54,7 +54,7 @@ interface SurfaceDict {
   trade_description_3: string;
 }
 
-interface DepthInfo {
+export interface DepthInfo {
   profit_loss: number;
   acquired_coin_t3: number;
   starting_amount: number;
@@ -100,12 +100,24 @@ export function getPriceForTPair(
   const pair_c: string = tPair["pair_c"];
 
   // Extract Price Information for Given Pairs
-  const pair_a_ask: number = parseFloat(pricesJson[pair_a]["lowestAsk"]);
-  const pair_a_bid: number = parseFloat(pricesJson[pair_a]["highestBid"]);
-  const pair_b_ask: number = parseFloat(pricesJson[pair_b]["lowestAsk"]);
-  const pair_b_bid: number = parseFloat(pricesJson[pair_b]["highestBid"]);
-  const pair_c_ask: number = parseFloat(pricesJson[pair_c]["lowestAsk"]);
-  const pair_c_bid: number = parseFloat(pricesJson[pair_c]["highestBid"]);
+  const pair_a_ask: number = pricesJson[pair_a]
+    ? parseFloat(pricesJson[pair_a]["lowestAsk"])
+    : 0;
+  const pair_a_bid: number = pricesJson[pair_a]
+    ? parseFloat(pricesJson[pair_a]["highestBid"])
+    : 0;
+  const pair_b_ask: number = pricesJson[pair_b]
+    ? parseFloat(pricesJson[pair_b]["lowestAsk"])
+    : 0;
+  const pair_b_bid: number = pricesJson[pair_b]
+    ? parseFloat(pricesJson[pair_b]["highestBid"])
+    : 0;
+  const pair_c_ask: number = pricesJson[pair_c]
+    ? parseFloat(pricesJson[pair_c]["lowestAsk"])
+    : 0;
+  const pair_c_bid: number = pricesJson[pair_c]
+    ? parseFloat(pricesJson[pair_c]["highestBid"])
+    : 0;
 
   // Output Object
   return {
