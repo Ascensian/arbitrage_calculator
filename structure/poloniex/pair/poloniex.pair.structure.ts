@@ -1,9 +1,10 @@
+import { Model, Mongoose } from "mongoose";
 import { IPair } from "../../../definitions/pairs";
 
 export class PoloniexPairStructure {
 
-    static structureTriangularPairs(coinlist: Array<string>): Array<IPair> {
-        const triangularPairsList: Array<IPair> = []
+    static async structureTriangularPairs(coinlist: Array<string>, pairModel: Model<IPair>): Promise<void> {
+
         const removeDuplicatesList: Array<string> = []
 
         for (const pairA of coinlist) {
@@ -24,20 +25,22 @@ export class PoloniexPairStructure {
                                 if (cBaseCounter == 2 && cQuoteCounter == 2 && cBase != cQuote) {
                                     const uniqueItem: string = combineAllPairs.sort().join(' ')
                                     if (!removeDuplicatesList.includes(uniqueItem)) {
-                                        const matchObject: IPair = {
-                                            "a_base": aBase,
-                                            "b_base": bBase,
-                                            "c_base": cBase,
-                                            "a_quote": aQuote,
-                                            "b_quote": bQuote,
-                                            "c_quote": cQuote,
-                                            "pair_a": pairA,
-                                            "pair_b": pairB,
-                                            "pair_c": pairC,
-                                            "triangular_pair": uniqueItem
+                                        try {
+                                            await pairModel.create({
+                                                a_base: aBase,
+                                                b_base: bBase,
+                                                c_base: cBase,
+                                                a_quote: aQuote,
+                                                b_quote: bQuote,
+                                                c_quote: cQuote,
+                                                pair_a: pairA,
+                                                pair_b: pairB,
+                                                pair_c: pairC,
+                                                triangular_pair: uniqueItem
+                                            });
+                                        } catch (err) {
+                                            console.log(err);
                                         }
-                                        triangularPairsList.push(matchObject)
-                                        removeDuplicatesList.push(uniqueItem)
                                     }
 
                                 }
@@ -49,7 +52,6 @@ export class PoloniexPairStructure {
                 }
             }
         }
-        return triangularPairsList
     }
 
     private static splitPair(pairs: string): Array<string> {

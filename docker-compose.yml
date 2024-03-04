@@ -8,8 +8,8 @@ services:
       - mongo_database
   mongo_database:
     image: mongo
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
     volumes:
-      -
+      - mongodb_data:/data/db
+volumes:
+  mongo_data:
+    driver: local

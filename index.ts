@@ -1,12 +1,17 @@
 import { configDotenv } from "dotenv";
 configDotenv()
-import { PoloniexHttpService } from "./http/poloniex/poloniex.http.service";
-import { startAPI } from "./platforms/api";
 import { MongooseUtils } from "./utils/mongoose.utils";
+import { startAPI } from "./platforms/api";
 
 async function main() {
-    startAPI()
-
+    try {
+        const connection = await MongooseUtils.connectDatabase()
+        if (connection) {
+            startAPI(connection)
+        }
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 main()
