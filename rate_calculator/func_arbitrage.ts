@@ -54,7 +54,7 @@ interface SurfaceDict {
   trade_description_3: string;
 }
 
-interface DepthInfo {
+export interface DepthInfo {
   profit_loss: number;
   acquired_coin_t3: number;
   starting_amount: number;
@@ -89,7 +89,6 @@ export async function get(url: string): Promise<any> {
   }
 }
 
-//export function getPriceForTPair(tPair: TPair, pricesJson: PricesJson):
 export function getPriceForTPair(
   tPair: TPair,
   pricesJson: PricesJson
@@ -118,7 +117,6 @@ export function getPriceForTPair(
   };
 }
 
-//export function calcTriangularArbSurfaceRate(tPair: TPair,pricesDict: PricesJson)
 export function calcTriangularArbSurfaceRate(
   tPair: TPair,
   pricesDict: PricesDict
@@ -430,8 +428,6 @@ export function calcTriangularArbSurfaceRate(
 
     /* Output Results */
     if (profitLossPerc > minSurfaceRate) {
-      //console.log("profitLossPerc > minSurfaceRate");
-
       surfaceDict = {
         swap_1: swap1,
         swap_2: swap2,
@@ -458,8 +454,6 @@ export function calcTriangularArbSurfaceRate(
       };
     }
   }
-  //console.log("Passage dans calcTriangularArbSurfaceRate");
-  //console.log("surfaceDict2", surfaceDict);
 
   return surfaceDict;
 }
@@ -590,7 +584,7 @@ export async function getDepthFromOrderbook(
     acquiredCoinT2,
     depth3ReformattedPrices
   );
-  //console.log("acquiredCoinT3", acquiredCoinT3);
+
   const profitLoss = acquiredCoinT3 - startingAmount;
   const realRatePerc =
     startingAmount !== 0 ? (profitLoss / startingAmount) * 100 : 0;
